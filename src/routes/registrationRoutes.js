@@ -1,0 +1,500 @@
+import {
+  createOrUpdateRegistrationRequest,
+  expireRegistrationEnrollments,
+  getRegistrationRequestByDecisionToken,
+  processRegistrationDecision,
+  createOrConfirmRegistrationTeacher,
+  updateRegistrationNotificationStatus
+} from "../supabase/registrationRepository.js";
+import {
+  isRegistrationApprover,
+  sendAlreadyActiveAdminLog,
+  sendApprovalOutcomeEmails,
+  sendEmailFailureAlert,
+  sendInvalidRegistrationAlert,
+  sendRegistrationApprovalEmails,
+  sendRegistrationReceivedEmail,
+  sendRejectionOutcomeEmails,
+  sendTrialExpiredEmails,
+  sendMissingTeacherCreationEmail,
+  signDecisionConfirmation,
+  signTeacherCreationLink,
+  verifyDecisionConfirmationSignature,
+  verifyTeacherCreationLink,
+  verifyDecisionLinkSignature
+} from "../services/registrationEmailService.js";
+
+function nowIso_() {
+  return new Date().toISOString();
+}
+
+function clean_(value) {
+  return String(value ?? "").trim();
+}
+
+function lower_(value) {
+  return clean_(value).toLowerCase();
+}
+
+function upper_(value) {
+  return clean_(value).toUpperCase();
+}
+
+function getSecret_(names) {
+  for (const name of names) {
+    const value = clean_(process.env[name]);
+    if (value) return value;
+  }
+  return "";
+}
+
+function getProvidedRegistrationSecret_(req) {
+  return clean_(
+    req.get("x-jea-registration-secret") ||
+    req.get("x-registration-webhook-secret") ||
+    req.body?.secret ||
+    req.query.secret ||
+    ""
+  );
+}
+
+function requireRegistrationWebhookSecret_(req, res) {
+  const configured = getSecret_(["REGISTRATION_WEBHOOK_SECRET"]);
+  if (!configured) {
+    res.status(500).json({
+      ok: false,
+      status: "REGISTRATION_WEBHOOK_SECRET_NOT_CONFIGURED",
+      message: "REGISTRATION_WEBHOOK_SECRET must be configured before accepting registration form submissions.",
+      checked_at: nowIso_()
+    });
+    return false;
+  }
+
+  if (getProvidedRegistrationSecret_(req) === configured) return true;
+
+  res.status(401).json({
+    ok: false,
+    status: "UNAUTHORIZED",
+    message: "Invalid or missing registration webhook secret.",
+    checked_at: nowIso_()
+  });
+  return false;
+}
+
+function getProvidedMaintenanceSecret_(req) {
+  return clean_(
+    req.get("x-registration-maintenance-secret") ||
+    req.get("x-worker-admin-secret") ||
+    req.body?.secret ||
+    req.query.secret ||
+    ""
+  );
+}
+
+function requireMaintenanceSecret_(req, res) {
+  const configured = getSecret_(["REGISTRATION_MAINTENANCE_SECRET", "WORKER_ADMIN_SECRET", "ADMIN_SECRET"]);
+  if (!configured) {
+    res.status(500).json({
+      ok: false,
+      status: "REGISTRATION_MAINTENANCE_SECRET_NOT_CONFIGURED",
+      message: "REGISTRATION_MAINTENANCE_SECRET, WORKER_ADMIN_SECRET, or ADMIN_SECRET must be configured before running registration maintenance.",
+      checked_at: nowIso_()
+    });
+    return false;
+  }
+
+  if (getProvidedMaintenanceSecret_(req) === configured) return true;
+
+  res.status(401).json({
+    ok: false,
+    status: "UNAUTHORIZED",
+    message: "Invalid or missing registration maintenance secret.",
+    checked_at: nowIso_()
+  });
+  return false;
+}
+
+function handleRouteError_(res, route, error) {
+  res.status(500).json({
+    ok: false,
+    route,
+    error: String(error && error.message ? error.message : error),
+    error_details: {
+      message: error?.message || String(error),
+      name: error?.name || "Error",
+      code: error?.code || "",
+      detail: error?.detail || "",
+      hint: error?.hint || "",
+      table: error?.table || "",
+      column: error?.column || "",
+      constraint: error?.constraint || ""
+    },
+    checked_at: nowIso_()
+  });
+}
+
+function escapeHtml_(value) {
+  return clean_(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function htmlPage_(title, body, statusClass = "") {
+  const borderColor = statusClass === "error" ? "#b42318" : statusClass === "warning" ? "#d97706" : "#2563eb";
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml_(title)}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;line-height:1.55;color:#172033;">
+  <div style="max-width:760px;margin:0 auto;padding:26px 14px;">
+    <div style="background:#ffffff;border:1px solid #e4e7ec;border-top:5px solid ${borderColor};border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(16,24,40,0.08);">
+      <div style="padding:22px 26px;border-bottom:1px solid #eef2f6;background:#ffffff;">
+        <div style="font-size:14px;font-weight:bold;color:#344054;margin-bottom:12px;">John's English Academy</div>
+        <h1 style="font-size:22px;line-height:1.25;margin:0;color:#101828;">${escapeHtml_(title)}</h1>
+      </div>
+      <div style="padding:24px 26px;">
+        ${body}
+      </div>
+      <div style="padding:16px 26px;border-top:1px solid #eef2f6;color:#667085;font-size:12px;background:#fbfcfe;">
+        Generated by John's English Academy registration system.
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function detailsTable_(rows) {
+  return `
+    <table style="border-collapse:collapse;width:100%;margin:16px 0;border:1px solid #e5e7eb;">
+      ${rows.map(([label, value]) => `
+        <tr>
+          <th style="border:1px solid #e5e7eb;background:#f3f4f6;padding:8px;text-align:left;width:42%;font-size:13px;color:#344054;">${escapeHtml_(label)}</th>
+          <td style="border:1px solid #e5e7eb;padding:8px;font-size:13px;color:#101828;word-break:break-word;">${escapeHtml_(value || "—")}</td>
+        </tr>
+      `).join("")}
+    </table>
+  `;
+}
+
+function canReviewRegistrationRequest_(approverEmail, request = {}) {
+  return isRegistrationApprover(approverEmail);
+}
+
+function reviewerRole_(approverEmail, request = {}) {
+  return isRegistrationApprover(approverEmail) ? "admin" : "unauthorised";
+}
+
+function inputField_(name, label, value, options = {}) {
+  const required = options.required ? " required" : "";
+  const type = options.type || "text";
+  return `
+    <label style="display:block;margin:10px 0 4px;font-size:12px;font-weight:bold;color:#344054;">${escapeHtml_(label)}</label>
+    <input type="${escapeHtml_(type)}" name="${escapeHtml_(name)}" value="${escapeHtml_(value || "")}"${required} style="width:100%;box-sizing:border-box;border:1px solid #d0d5dd;border-radius:9px;padding:9px 10px;font-size:14px;color:#101828;background:#ffffff;">
+  `;
+}
+
+function selectField_(name, label, value, options = []) {
+  const current = upper_(value);
+  return `
+    <label style="display:block;margin:10px 0 4px;font-size:12px;font-weight:bold;color:#344054;">${escapeHtml_(label)}</label>
+    <select name="${escapeHtml_(name)}" required style="width:100%;box-sizing:border-box;border:1px solid #d0d5dd;border-radius:9px;padding:9px 10px;font-size:14px;color:#101828;background:#ffffff;">
+      ${options.map((option) => `<option value="${escapeHtml_(option)}"${upper_(option) === current ? " selected" : ""}>${escapeHtml_(option)}</option>`).join("")}
+    </select>
+  `;
+}
+
+function textareaField_(name, label, value, options = {}) {
+  const required = options.required ? " required" : "";
+  return `
+    <label style="display:block;margin:10px 0 4px;font-size:12px;font-weight:bold;color:#344054;">${escapeHtml_(label)}</label>
+    <textarea name="${escapeHtml_(name)}" rows="4"${required} style="width:100%;box-sizing:border-box;border:1px solid #d0d5dd;border-radius:9px;padding:9px 10px;font-size:14px;color:#101828;background:#ffffff;">${escapeHtml_(value || "")}</textarea>
+  `;
+}
+
+function editableDecisionForm_({ token, approverEmail, request }) {
+  const signature = signDecisionConfirmation({ token, action: "confirm", approverEmail });
+  return `
+    <form method="post" action="/api/registration/decision/confirm" style="margin:18px 0 0;border:1px solid #e5e7eb;background:#fbfcfe;border-radius:14px;padding:16px;">
+      <input type="hidden" name="token" value="${escapeHtml_(token)}">
+      <input type="hidden" name="approver_email" value="${escapeHtml_(approverEmail)}">
+      <input type="hidden" name="sig" value="${escapeHtml_(signature)}">
+
+      <h2 style="font-size:16px;margin:0 0 8px;color:#101828;">Adjust the request before making a decision</h2>
+      <p style="margin:0 0 12px;color:#667085;font-size:13px;line-height:1.55;">You may correct the registration data, select the speaking type and assign the teacher before approving.</p>
+
+      ${inputField_("reviewed_student_name", "Student full name", request.student_name || "", { required: true })}
+      ${inputField_("reviewed_student_phone", "WhatsApp / phone", request.student_phone || "")}
+      ${inputField_("reviewed_country", "Country", request.country || "")}
+      ${selectField_("reviewed_level", "Level", request.level || "A1", ["A1", "A2", "B1"])}
+      ${selectField_("reviewed_student_type", "Speaking student type", request.student_type || "group", ["group", "private", "ielts"])}
+      ${inputField_("reviewed_teacher_email", "Assigned teacher email", request.reviewed_teacher_email || request.teacher_email || "", { required: true, type: "email" })}
+      ${textareaField_("rejection_reason", "Reason/message to include if you reject", "", { required: false })}
+
+      <div style="margin-top:16px;">
+        <button type="submit" name="action" value="approve_indefinite" style="border:0;background:#2563eb;color:#ffffff;font-weight:bold;border-radius:10px;padding:11px 15px;font-size:14px;cursor:pointer;margin:5px 5px 5px 0;">Approve indefinitely</button>
+        <button type="submit" name="action" value="reject" style="border:0;background:#b42318;color:#ffffff;font-weight:bold;border-radius:10px;padding:11px 15px;font-size:14px;cursor:pointer;margin:5px 5px 5px 0;">Reject and send reason</button>
+      </div>
+    </form>
+  `;
+}
+
+function reviewPageHtml_({ token, approverEmail, request }) {
+  if (!request) {
+    return htmlPage_("Invalid or outdated registration link", "<p>This registration request could not be found. It may have been replaced by a newer request.</p>", "error");
+  }
+
+  const isPending = request.status === "pending";
+  const statusWarning = request.status !== "pending"
+    ? `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px;margin:16px 0;color:#92400e;">This request is no longer pending. Current status: <strong>${escapeHtml_(request.status)}</strong>.</div>`
+    : "";
+
+  const body = `
+    <p style="margin:0 0 15px;font-size:15px;line-height:1.65;color:#344054;">Review this registration request carefully. This page is safe to open; no database decision is made until you click one of the buttons below.</p>
+    ${statusWarning}
+    ${detailsTable_([
+      ["Student name", request.student_name],
+      ["Student email", request.student_email],
+      ["Phone / WhatsApp", request.student_phone],
+      ["Country", request.country],
+      ["Requested level", request.level],
+      ["Requested teacher", request.teacher_email],
+      ["Submitted at", request.submitted_at],
+      ["Source sheet", `${request.sheet_name || ""}${request.row_number ? ` — row ${request.row_number}` : ""}`],
+      ["Existing student found", request.existing_student_found ? "Yes" : "No"],
+      ["Active under same teacher", request.has_active_enrollment_same_teacher ? "Yes" : "No"]
+    ])}
+    ${isPending ? editableDecisionForm_({ token, approverEmail, request }) : ""}
+    <p style="margin-top:18px;color:#667085;font-size:12px;">The final decision is made only by the POST button click on this page. Email security scanners that only open links cannot approve or reject this request.</p>
+  `;
+
+  return htmlPage_("Review registration request", body, request.status === "pending" ? "" : "warning");
+}
+
+function decisionResultHtml_(result) {
+  const request = result.request || {};
+  const className = result.ok ? "" : "error";
+  return htmlPage_("Registration decision processed", `
+    <p><strong>Status:</strong> ${escapeHtml_(result.status)}</p>
+    <p><strong>Student:</strong> ${escapeHtml_(request.student_name || request.student_email)}</p>
+    <p><strong>Teacher:</strong> ${escapeHtml_(request.reviewed_teacher_email || result.teacher?.teacher_email || request.teacher_email || "")}</p>
+    <p><strong>Level:</strong> ${escapeHtml_(request.level || "")}</p>
+    ${request.access_type ? `<p><strong>Access type:</strong> ${escapeHtml_(request.access_type)}</p>` : ""}
+    ${request.registration_start_at ? `<p><strong>Start UTC:</strong> ${escapeHtml_(request.registration_start_at)}</p>` : ""}
+    ${request.registration_end_at ? `<p><strong>End UTC:</strong> ${escapeHtml_(request.registration_end_at)}</p>` : ""}
+    ${result.message ? `<p>${escapeHtml_(result.message)}</p>` : ""}
+  `, className);
+}
+
+async function updateNotificationAndAlertFailures_(requestId, context, delivery) {
+  const failures = (delivery.results || []).filter((item) => !item.ok);
+  await updateRegistrationNotificationStatus(requestId, delivery.notification_status);
+
+  if (failures.length) {
+    await sendEmailFailureAlert({ requestId, context, failures }).catch(() => {});
+  }
+}
+
+function combineDeliveryResults_(...deliveries) {
+  const results = deliveries.flatMap((delivery) => Array.isArray(delivery?.results) ? delivery.results : []);
+  const failures = results.filter((item) => !item.ok);
+
+  if (!results.length) {
+    return { notification_status: "not_sent", results };
+  }
+
+  if (!failures.length) {
+    return { notification_status: "sent", results };
+  }
+
+  if (failures.length === results.length) {
+    return { notification_status: "failed", results };
+  }
+
+  return { notification_status: "partially_failed", results };
+}
+
+async function handleDecisionResultEmails_(decisionResult) {
+  if (!decisionResult.ok) return;
+
+  if (decisionResult.status === "APPROVED") {
+    const delivery = await sendApprovalOutcomeEmails({ decisionResult });
+    await updateNotificationAndAlertFailures_(decisionResult.request.id, "registration approval", delivery);
+  } else if (decisionResult.status === "REJECTED") {
+    const delivery = await sendRejectionOutcomeEmails({ decisionResult });
+    await updateNotificationAndAlertFailures_(decisionResult.request.id, "registration rejection", delivery);
+  } else if (decisionResult.status === "ALREADY_ACTIVE_SAME_TEACHER") {
+    const delivery = await sendAlreadyActiveAdminLog({ decisionResult });
+    await updateNotificationAndAlertFailures_(decisionResult.request.id, "registration already active", delivery);
+  }
+}
+
+export function registerRegistrationRoutes(app) {
+  app.post("/api/registration/forms/submit", async (req, res) => {
+    if (!requireRegistrationWebhookSecret_(req, res)) return;
+
+    try {
+      const registrationResult = await createOrUpdateRegistrationRequest(req.body || {});
+      const receiptDelivery = await sendRegistrationReceivedEmail({ registrationResult });
+      let adminDelivery = { notification_status: "not_sent", results: [] };
+
+      if (registrationResult.status === "pending") {
+        adminDelivery = await sendRegistrationApprovalEmails({ registrationResult });
+      } else {
+        adminDelivery = await sendInvalidRegistrationAlert({ registrationResult });
+      }
+
+      const delivery = combineDeliveryResults_(receiptDelivery, adminDelivery);
+
+      await updateNotificationAndAlertFailures_(
+        registrationResult.request.id,
+        `registration submission ${registrationResult.status}`,
+        delivery
+      );
+
+      res.status(201).json({
+        ok: true,
+        status: registrationResult.status,
+        duplicate_updated: registrationResult.duplicate_updated,
+        request: registrationResult.request,
+        email_delivery: delivery,
+        checked_at: nowIso_()
+      });
+    } catch (error) {
+      handleRouteError_(res, "/api/registration/forms/submit", error);
+    }
+  });
+
+  app.get("/api/registration/decision", async (req, res) => {
+    const token = clean_(req.query.token);
+    const approverEmail = lower_(req.query.approver_email);
+    const signature = clean_(req.query.sig);
+
+    if (!token || !approverEmail || !signature) {
+      res.status(400).send(htmlPage_("Invalid registration link", "<p>The registration review link is incomplete.</p>", "error"));
+      return;
+    }
+
+    if (!verifyDecisionLinkSignature({ token, approverEmail, signature })) {
+      res.status(403).send(htmlPage_("Invalid registration link", "<p>The registration review link signature is invalid.</p>", "error"));
+      return;
+    }
+
+    try {
+      const request = await getRegistrationRequestByDecisionToken(token);
+      if (!canReviewRegistrationRequest_(approverEmail, request || {})) {
+        res.status(403).send(htmlPage_("Unauthorised reviewer", "<p>This email is not authorised to review this registration request.</p>", "error"));
+        return;
+      }
+      res.status(200).send(reviewPageHtml_({ token, approverEmail, request }));
+    } catch (error) {
+      res.status(500).send(htmlPage_("Registration review failed", `<p>${escapeHtml_(error && error.message ? error.message : error)}</p>`, "error"));
+    }
+  });
+
+  app.post("/api/registration/decision/confirm", async (req, res) => {
+    const token = clean_(req.body?.token || req.query.token);
+    const action = lower_(req.body?.action || req.query.action);
+    const approverEmail = lower_(req.body?.approver_email || req.query.approver_email);
+    const signature = clean_(req.body?.sig || req.query.sig);
+
+    if (!token || !action || !approverEmail || !signature) {
+      res.status(400).send(htmlPage_("Invalid registration decision", "<p>The registration decision form is incomplete.</p>", "error"));
+      return;
+    }
+
+    if (!verifyDecisionConfirmationSignature({ token, action: "confirm", approverEmail, signature })) {
+      res.status(403).send(htmlPage_("Invalid registration decision", "<p>The decision confirmation signature is invalid.</p>", "error"));
+      return;
+    }
+
+    try {
+      const pendingRequest = await getRegistrationRequestByDecisionToken(token);
+      if (!canReviewRegistrationRequest_(approverEmail, pendingRequest || {})) {
+        res.status(403).send(htmlPage_("Unauthorised reviewer", "<p>This email is not authorised to review this registration request.</p>", "error"));
+        return;
+      }
+
+      const decisionResult = await processRegistrationDecision({
+        token,
+        action,
+        approverEmail,
+        reviewerRole: reviewerRole_(approverEmail, pendingRequest || {}),
+        reviewedData: {
+          student_name: req.body?.reviewed_student_name,
+          student_phone: req.body?.reviewed_student_phone,
+          country: req.body?.reviewed_country,
+          level: req.body?.reviewed_level,
+          student_type: req.body?.reviewed_student_type,
+          teacher_email: req.body?.reviewed_teacher_email
+        },
+        rejectionReason: req.body?.rejection_reason
+      });
+      if (decisionResult.status === "TEACHER_CREATION_REQUIRED") {
+        await sendMissingTeacherCreationEmail({ decisionResult, token });
+      } else {
+        await handleDecisionResultEmails_(decisionResult);
+      }
+
+      res.status(decisionResult.ok ? 200 : 400).send(decisionResultHtml_(decisionResult));
+    } catch (error) {
+      res.status(500).send(htmlPage_("Registration decision failed", `<p>${escapeHtml_(error && error.message ? error.message : error)}</p>`, "error"));
+    }
+  });
+
+  app.get("/api/registration/teacher/create", async (req, res) => {
+    const token=clean_(req.query.token);const approverEmail=lower_(req.query.approver_email);const signature=clean_(req.query.sig);
+    if(!verifyTeacherCreationLink({token,approverEmail,signature})||!isRegistrationApprover(approverEmail))return res.status(403).send(htmlPage_("Invalid teacher-creation link","<p>This link is invalid.</p>","error"));
+    const request=await getRegistrationRequestByDecisionToken(token);
+    if(!request||request.status!=="pending")return res.status(400).send(htmlPage_("Registration unavailable","<p>This registration is no longer pending.</p>","error"));
+    const confirmSig=signTeacherCreationLink({token,approverEmail});
+    return res.send(htmlPage_("Create assigned teacher",`<p>The student will be approved automatically after the teacher is created.</p><form method="post" action="/api/registration/teacher/create"><input type="hidden" name="token" value="${escapeHtml_(token)}"><input type="hidden" name="approver_email" value="${escapeHtml_(approverEmail)}"><input type="hidden" name="sig" value="${escapeHtml_(confirmSig)}">${inputField_("teacher_full_name","Teacher full name","",{required:true})}${inputField_("teacher_email","Teacher email",request.reviewed_teacher_email||request.teacher_email,{required:true,type:"email"})}${inputField_("teacher_whatsapp","Teacher WhatsApp number","",{required:true})}<button type="submit" style="margin-top:16px;padding:11px 16px;background:#2563eb;color:white;border:0;border-radius:9px;font-weight:bold">Create</button></form>`));
+  });
+
+  app.post("/api/registration/teacher/create", async (req, res) => {
+    const token=clean_(req.body.token);const approverEmail=lower_(req.body.approver_email);const signature=clean_(req.body.sig);
+    if(!verifyTeacherCreationLink({token,approverEmail,signature})||!isRegistrationApprover(approverEmail))return res.status(403).send(htmlPage_("Invalid teacher-creation request","<p>This request is invalid.</p>","error"));
+    try{
+      const request=await getRegistrationRequestByDecisionToken(token);
+      const teacherResult=await createOrConfirmRegistrationTeacher({email:req.body.teacher_email,fullName:req.body.teacher_full_name,whatsappNumber:req.body.teacher_whatsapp,confirmConflict:req.body.confirm_conflict==="yes"});
+      if(teacherResult.status==="TEACHER_DETAILS_CONFLICT"){
+        const rows=teacherResult.conflicts.map(c=>[c.field,`Database: ${c.database} | Submitted: ${c.submitted}`]);
+        return res.status(409).send(htmlPage_("Confirm teacher-detail conflicts",`${detailsTable_(rows)}<form method="post" action="/api/registration/teacher/create"><input type="hidden" name="token" value="${escapeHtml_(token)}"><input type="hidden" name="approver_email" value="${escapeHtml_(approverEmail)}"><input type="hidden" name="sig" value="${escapeHtml_(signature)}"><input type="hidden" name="teacher_full_name" value="${escapeHtml_(req.body.teacher_full_name)}"><input type="hidden" name="teacher_email" value="${escapeHtml_(req.body.teacher_email)}"><input type="hidden" name="teacher_whatsapp" value="${escapeHtml_(req.body.teacher_whatsapp)}"><input type="hidden" name="confirm_conflict" value="yes"><button type="submit" style="padding:11px 16px">Confirm submitted details and continue</button></form>`,"warning"));
+      }
+      if(!teacherResult.ok)return res.status(400).send(htmlPage_("Teacher creation failed",`<p>${escapeHtml_(teacherResult.message)}</p>`,"error"));
+      const decisionResult=await processRegistrationDecision({token,action:"approve_indefinite",approverEmail,reviewerRole:"admin",reviewedData:{student_name:request.student_name,student_phone:request.student_phone,country:request.country,level:request.level,student_type:request.student_type,teacher_email:req.body.teacher_email}});
+      await handleDecisionResultEmails_(decisionResult);
+      return res.status(decisionResult.ok?200:400).send(decisionResultHtml_(decisionResult));
+    }catch(error){return res.status(500).send(htmlPage_("Teacher creation failed",`<p>${escapeHtml_(error.message)}</p>`,"error"));}
+  });
+
+  app.post("/api/registration/expire-enrollments", async (req, res) => {
+    if (!requireMaintenanceSecret_(req, res)) return;
+
+    try {
+      const result = await expireRegistrationEnrollments();
+      const delivery = await sendTrialExpiredEmails({ expiryResult: result });
+      const failures = (delivery.results || []).filter((item) => !item.ok);
+
+      if (failures.length) {
+        await sendEmailFailureAlert({
+          requestId: result.expired_trials?.[0]?.request?.id || null,
+          context: "registration trial expiry",
+          failures
+        }).catch(() => {});
+      }
+
+      res.status(200).json({
+        ...result,
+        email_delivery: delivery
+      });
+    } catch (error) {
+      handleRouteError_(res, "/api/registration/expire-enrollments", error);
+    }
+  });
+}

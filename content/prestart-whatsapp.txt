@@ -1,0 +1,1 @@
+Hello {{student_name}}, this is {{teacher_name}}, your English teacher at Smart English Learning Center. Your lessons are scheduled to start on {{start_date}}, at level {{level}}. I’m contacting you to welcome you and help you prepare for your start. Do you have any questions before we begin?

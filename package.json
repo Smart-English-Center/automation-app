@@ -1,0 +1,61 @@
+{
+  "name": "selc-worker",
+  "version": "1.2.7",
+  "description": "Smart English Learning Center backend adapted from the uploaded working JEA worker.",
+  "main": "src/selc/server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node src/selc/server.mjs",
+    "dev": "node --env-file=.env.local src/selc/server.mjs",
+    "check": "node scripts/check-syntax.js && node scripts/check-imports.js && node scripts/check-sql.js",
+    "test": "node --test tests/selc/*.test.mjs",
+    "diagnostics": "node --env-file=.env.local src/server.js",
+    "review:one": "node scripts/run-review-one.js",
+    "review:one:local": "node --env-file=.env.local scripts/run-review-one.js",
+    "email:once": "node scripts/run-student-email-delivery-once.js",
+    "email:once:local": "node --env-file=.env.local scripts/run-student-email-delivery-once.js",
+    "encouragement:once:local": "node --env-file=.env.local scripts/run-encouragement-emails-once.js",
+    "encouragement:once": "node scripts/run-encouragement-emails-once.js",
+    "reconcile:once": "node scripts/run-source-form-reconciliation-once.js",
+    "reconcile:once:local": "node --env-file=.env.local scripts/run-source-form-reconciliation-once.js",
+    "audio:drive:once": "node scripts/run-audio-drive-storage-once.js",
+    "audio:drive:once:local": "node --env-file=.env.local scripts/run-audio-drive-storage-once.js",
+    "jobs:create-missing:once": "node scripts/run-create-missing-correction-jobs-once.js",
+    "jobs:create-missing:once:local": "node --env-file=.env.local scripts/run-create-missing-correction-jobs-once.js",
+    "process:jobs": "node scripts/process-correction-jobs.js",
+    "process:jobs:local": "node --env-file=.env.local scripts/process-correction-jobs.js",
+    "teacher:digest:once": "node scripts/run-teacher-progress-digest-once.js",
+    "registration:expire:once": "node scripts/run-registration-expiry-once.js",
+    "registration:expire:once:local": "node --env-file=.env.local scripts/run-registration-expiry-once.js",
+    "final-feedback:assemble:once": "node scripts/run-final-feedback-assemble-once.js",
+    "pdf:generate:once": "node scripts/run-pdf-generate-once.js",
+    "pdf:poll:once": "node scripts/run-pdf-poll-once.js",
+    "progress:reports:queue": "node scripts/run-student-progress-reports-once.js",
+    "progress:reports:queue:local": "node --env-file=.env.local scripts/run-student-progress-reports-once.js",
+    "maintainer:alert:test": "node scripts/run-maintainer-alert-test-once.js",
+    "maintainer:alert:test:local": "node --env-file=.env.local scripts/run-maintainer-alert-test-once.js",
+    "email:design-samples:queue": "node scripts/queue-email-design-samples-once.js",
+    "email:design-samples:queue:local": "node --env-file=.env.local scripts/queue-email-design-samples-once.js",
+    "admin:payment-control:once": "node scripts/run-admin-payment-control-once.js",
+    "admin:payment-control:once:local": "node --env-file=.env.local scripts/run-admin-payment-control-once.js",
+    "speaking:pipeline:once": "node scripts/run-speaking-pipeline-once.js",
+    "speaking:pipeline:once:local": "node --env-file=.env.local scripts/run-speaking-pipeline-once.js",
+    "speaking:email:once": "node scripts/run-speaking-email-delivery-once.js",
+    "speaking:email:once:local": "node --env-file=.env.local scripts/run-speaking-email-delivery-once.js",
+    "test:legacy": "TZ=Africa/Douala SCHEDULER_TIMEZONE=Africa/Douala node --test tests/*.test.js",
+    "check:selc": "node scripts/check-selc.mjs",
+    "selc:db-status": "node scripts/selc-db-status.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "node-cron": "^3.0.3",
+    "pg": "^8.12.0",
+    "ajv": "^8.17.1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.11"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "base_archive": "jea-correction-system-main (9).zip",
+  "sha256": "29c9b976849cf0c48a11019ec989e123ad3f4fb8ccc7c0a91f798f333d9c02dd",
+  "selc_entry": "src/selc/server.mjs",
+  "original_upload_modified": false,
+  "apps_script_included": false,
+  "release_ready": true,
+  "live_connections_verified": false,
+  "content_basis": "Recovered wording plus requirement-based replacements explicitly authorised by the user"
+}

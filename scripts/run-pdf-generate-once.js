@@ -1,0 +1,64 @@
+const baseUrl = String(
+  process.env.WORKER_BASE_URL ||
+  process.env.PUBLIC_WORKER_BASE_URL ||
+  process.env.SLIPLANE_APP_URL ||
+  `http://127.0.0.1:${process.env.PORT || 3000}`
+).replace(/\/+$/, "");
+
+const secret = String(
+  process.env.WORKER_ADMIN_TEST_SECRET ||
+  process.env.WORKER_ADMIN_SECRET ||
+  process.env.ADMIN_SECRET ||
+  ""
+).trim();
+
+const url = new URL(`${baseUrl}/worker/pdf/generate`);
+if (secret) url.searchParams.set("secret", secret);
+if (process.env.PDF_INCLUDE_SAME_DAY_READY) {
+  url.searchParams.set("include_today", process.env.PDF_INCLUDE_SAME_DAY_READY);
+}
+if (process.env.PDF_MAX_ASSIGNMENTS_PER_STUDENT) {
+  url.searchParams.set("max_assignments", process.env.PDF_MAX_ASSIGNMENTS_PER_STUDENT);
+}
+if (process.env.PDF_GENERATE_STUDENT_EMAIL) {
+  url.searchParams.set("student_email", process.env.PDF_GENERATE_STUDENT_EMAIL);
+}
+if (process.env.PDF_GENERATE_STUDENT_ID) {
+  url.searchParams.set("student_id", process.env.PDF_GENERATE_STUDENT_ID);
+}
+
+try {
+  const response = await fetch(url, { method: "POST" });
+  const text = await response.text();
+
+  let body = text;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    // keep raw body
+  }
+
+  const result = {
+    ok: response.ok,
+    script: "run-pdf-generate-once",
+    status: response.status,
+    url: url.toString(),
+    response: body,
+    at: new Date().toISOString()
+  };
+
+  console.log(JSON.stringify(result, null, 2));
+
+  if (!response.ok || body?.ok === false) {
+    process.exit(1);
+  }
+} catch (error) {
+  console.error(JSON.stringify({
+    ok: false,
+    script: "run-pdf-generate-once",
+    error: error instanceof Error ? error.message : String(error),
+    at: new Date().toISOString()
+  }, null, 2));
+
+  process.exit(1);
+}

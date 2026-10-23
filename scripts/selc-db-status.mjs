@@ -1,0 +1,2 @@
+import {getSupabasePool} from '../src/supabase/client.js';
+const pool=getSupabasePool();try{const table=(await pool.query("select to_regclass('public.selc_schema_version') as name")).rows[0];console.log(JSON.stringify(table.name?(await pool.query('select version,installed_at from public.selc_schema_version order by version')).rows:{status:'SELC_SCHEMA_NOT_INSTALLED'},null,2));}finally{await pool.end();}

@@ -1,0 +1,592 @@
+{
+  "batch_id": "JEA-DIGEST-PROMPT-V4-COMPREHENSIVE-010",
+  "students": [
+    {
+      "request_id": "WEDNESDAY-TEST-001",
+      "student_name_for_message": "Arielle Sandrine",
+      "language": "fr",
+      "context": {
+        "digest_day": "WEDNESDAY",
+        "reporting_period_complete": false,
+        "reporting_period_description": "Work received from Sunday to Tuesday",
+        "level": "A1",
+        "module": 3,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [
+          {
+            "skill": "QUIZ",
+            "assignment_name": "A1 Module 3 – Unit 4 – Day 1 Quiz",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 92
+          },
+          {
+            "skill": "QUIZ",
+            "assignment_name": "A1 Module 3 – Unit 4 – Day 2 Quiz",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 78
+          },
+          {
+            "skill": "WRITING",
+            "assignment_name": "A1 Module 3 – Unit 4 – Day 2 Assignment",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 74
+          },
+          {
+            "skill": "SPEAKING",
+            "assignment_name": "A1 Module 3 – Unit 4 – Day 2 Assignment",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 86
+          }
+        ],
+        "days_worked_current_period": 3,
+        "days_available_current_period": 3,
+        "assignment_participation": {
+          "period_scope": "INTERIM_WINDOW",
+          "writing_submitted": true,
+          "speaking_submitted": true,
+          "writing_assignment_count": 1,
+          "speaking_assignment_count": 1
+        }
+      },
+      "must_deliver": [
+        {
+          "assignment_name": "A1 Module 3 – Unit 4 – Day 2 Assignment",
+          "correction_url": "https://example.com/corrections/arielle-day-2"
+        }
+      ]
+    },
+    {
+      "request_id": "WEDNESDAY-TEST-002",
+      "student_name_for_message": "Grace Mireille",
+      "language": "en",
+      "context": {
+        "digest_day": "WEDNESDAY",
+        "reporting_period_complete": false,
+        "reporting_period_description": "Work received from Sunday to Tuesday",
+        "level": "A2",
+        "module": 2,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [
+          {
+            "skill": "QUIZ",
+            "assignment_name": "A2 Module 2 – Unit 1 – Day 1 Quiz",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 82
+          },
+          {
+            "skill": "QUIZ",
+            "assignment_name": "A2 Module 2 – Unit 1 – Day 2 Quiz",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 57
+          }
+        ],
+        "days_worked_current_period": 2,
+        "days_available_current_period": 3,
+        "assignment_participation": {
+          "period_scope": "INTERIM_WINDOW",
+          "writing_submitted": false,
+          "speaking_submitted": false,
+          "writing_assignment_count": 0,
+          "speaking_assignment_count": 0
+        }
+      },
+      "must_deliver": []
+    },
+    {
+      "request_id": "FRIDAY-TEST-001",
+      "student_name_for_message": "Sarah Michelle",
+      "language": "en",
+      "context": {
+        "digest_day": "FRIDAY",
+        "reporting_period_complete": false,
+        "reporting_period_description": "Work received on Wednesday and Thursday",
+        "level": "A2",
+        "module": 4,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [
+          {
+            "skill": "QUIZ",
+            "assignment_name": "A2 Module 4 – Unit 1 – Day 3 Quiz",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 84
+          },
+          {
+            "skill": "WRITING",
+            "assignment_name": "A2 Module 4 – Unit 1 – Day 3 Assignment",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 76
+          },
+          {
+            "skill": "SPEAKING",
+            "assignment_name": "A2 Module 4 – Unit 1 – Day 3 Assignment",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 81
+          },
+          {
+            "skill": "QUIZ",
+            "assignment_name": "A2 Module 4 – Unit 1 – Day 4 Quiz",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 89
+          },
+          {
+            "skill": "WRITING",
+            "assignment_name": "A2 Module 4 – Unit 1 – Day 4 Assignment",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 83
+          },
+          {
+            "skill": "SPEAKING",
+            "assignment_name": "A2 Module 4 – Unit 1 – Day 4 Assignment",
+            "result_type": "RECENT_ASSESSED_RESULT",
+            "score_percent": 79
+          }
+        ],
+        "days_worked_current_period": 2,
+        "days_available_current_period": 2,
+        "assignment_participation": {
+          "period_scope": "INTERIM_WINDOW",
+          "writing_submitted": true,
+          "speaking_submitted": true,
+          "writing_assignment_count": 2,
+          "speaking_assignment_count": 2
+        }
+      },
+      "must_deliver": [
+        {
+          "assignment_name": "A2 Module 4 – Unit 1 – Day 3 Assignment",
+          "correction_url": "https://example.com/corrections/sarah-day-3"
+        },
+        {
+          "assignment_name": "A2 Module 4 – Unit 1 – Day 4 Assignment",
+          "correction_url": "https://example.com/corrections/sarah-day-4"
+        }
+      ]
+    },
+    {
+      "request_id": "FRIDAY-TEST-002",
+      "student_name_for_message": "Patrick Junior",
+      "language": "en",
+      "context": {
+        "digest_day": "FRIDAY",
+        "reporting_period_complete": false,
+        "reporting_period_description": "Work received on Wednesday and Thursday",
+        "level": "B1",
+        "module": 3,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [],
+        "days_worked_current_period": 0,
+        "days_available_current_period": 2,
+        "assignment_participation": {
+          "period_scope": "INTERIM_WINDOW",
+          "writing_submitted": false,
+          "speaking_submitted": false,
+          "writing_assignment_count": 0,
+          "speaking_assignment_count": 0
+        },
+        "most_recent_learning_activity_date": "2026-09-08",
+        "most_recent_assignment_date": "2026-09-08"
+      },
+      "must_deliver": []
+    },
+    {
+      "request_id": "SUNDAY-TEST-001",
+      "student_name_for_message": "Esther Marie",
+      "language": "en",
+      "context": {
+        "digest_day": "SUNDAY",
+        "reporting_period_complete": true,
+        "reporting_period_description": "Completed Sunday-to-Saturday reporting period",
+        "level": "B1",
+        "module": 3,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [
+          {
+            "skill": "QUIZ",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 88.5
+          },
+          {
+            "skill": "WRITING",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 74
+          },
+          {
+            "skill": "SPEAKING",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 82
+          },
+          {
+            "skill": "WRITING",
+            "assignment_name": "B1 Module 3 – Unit 2 – Day 5 Assignment",
+            "result_type": "ASSESSED_ASSIGNMENT",
+            "score_percent": 68
+          },
+          {
+            "skill": "SPEAKING",
+            "assignment_name": "B1 Module 3 – Unit 2 – Day 5 Assignment",
+            "result_type": "ASSESSED_ASSIGNMENT",
+            "score_percent": 84
+          }
+        ],
+        "days_worked_current_period": 5,
+        "days_available_current_period": 7,
+        "days_worked_previous_complete_period": 3,
+        "assignment_participation": {
+          "period_scope": "COMPLETE_WEEK",
+          "writing_submitted": true,
+          "speaking_submitted": true,
+          "writing_assignment_count": 1,
+          "speaking_assignment_count": 1
+        },
+        "participation_pattern": {
+          "current_week_days": 5,
+          "recent_complete_weeks": [
+            { "period_start": "2026-09-13", "days_worked": 3 },
+            { "period_start": "2026-09-20", "days_worked": 5 }
+          ],
+          "pattern": "IMPROVING",
+          "consecutive_weeks_below_four_days": 0,
+          "consistency_priority_next_week": "MAINTAIN_OR_IMPROVE"
+        }
+      },
+      "must_deliver": [
+        {
+          "assignment_name": "B1 Module 3 – Unit 2 – Day 5 Assignment",
+          "correction_url": "https://example.com/corrections/esther-day-5"
+        }
+      ]
+    },
+    {
+      "request_id": "SUNDAY-TEST-002",
+      "student_name_for_message": "Nadia Prisca",
+      "language": "fr",
+      "context": {
+        "digest_day": "SUNDAY",
+        "reporting_period_complete": true,
+        "reporting_period_description": "Completed Sunday-to-Saturday reporting period",
+        "level": "A1",
+        "module": 2,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [
+          {
+            "skill": "QUIZ",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 42
+          }
+        ],
+        "days_worked_current_period": 3,
+        "days_available_current_period": 7,
+        "days_worked_previous_complete_period": 5,
+        "assignment_participation": {
+          "period_scope": "COMPLETE_WEEK",
+          "writing_submitted": false,
+          "speaking_submitted": false,
+          "writing_assignment_count": 0,
+          "speaking_assignment_count": 0
+        },
+        "most_recent_assignment_date": "2026-09-13",
+        "most_recent_assignment_date_for_message": "13 septembre 2026",
+        "participation_pattern": {
+          "current_week_days": 3,
+          "recent_complete_weeks": [
+            { "period_start": "2026-09-13", "days_worked": 5 },
+            { "period_start": "2026-09-20", "days_worked": 3 }
+          ],
+          "pattern": "DECLINING",
+          "consecutive_weeks_below_four_days": 1,
+          "consistency_priority_next_week": "STRONGER",
+          "suggested_active_days_next_week": 4
+        }
+      },
+      "must_deliver": []
+    },
+    {
+      "request_id": "LAST-SUNDAY-TEST-001",
+      "student_name_for_message": "Daniel Marc",
+      "language": "en",
+      "context": {
+        "digest_day": "SUNDAY",
+        "reporting_period_complete": true,
+        "reporting_period_description": "Completed Sunday-to-Saturday reporting period",
+        "is_last_sunday_of_month": true,
+        "level": "B2",
+        "module": 4,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [
+          {
+            "skill": "QUIZ",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 90
+          },
+          {
+            "skill": "WRITING",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 79
+          },
+          {
+            "skill": "SPEAKING",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 87
+          },
+          {
+            "skill": "WRITING",
+            "assignment_name": "B2 Module 4 – Unit 2 – Final Assignment",
+            "result_type": "ASSESSED_ASSIGNMENT",
+            "score_percent": 72
+          },
+          {
+            "skill": "SPEAKING",
+            "assignment_name": "B2 Module 4 – Unit 2 – Final Assignment",
+            "result_type": "ASSESSED_ASSIGNMENT",
+            "score_percent": 88
+          }
+        ],
+        "days_worked_current_period": 6,
+        "days_available_current_period": 7,
+        "days_worked_previous_complete_period": 5,
+        "assignment_participation": {
+          "period_scope": "COMPLETE_WEEK",
+          "writing_submitted": true,
+          "speaking_submitted": true,
+          "writing_assignment_count": 1,
+          "speaking_assignment_count": 1
+        },
+        "participation_pattern": {
+          "current_week_days": 6,
+          "recent_complete_weeks": [
+            { "period_start": "2026-08-30", "days_worked": 3 },
+            { "period_start": "2026-09-06", "days_worked": 4 },
+            { "period_start": "2026-09-13", "days_worked": 5 },
+            { "period_start": "2026-09-20", "days_worked": 6 }
+          ],
+          "pattern": "IMPROVING",
+          "consecutive_weeks_below_four_days": 0,
+          "consistency_priority_next_week": "MAINTAIN_OR_IMPROVE"
+        },
+        "recent_complete_periods": [
+          {
+            "period_start": "2026-08-30",
+            "period_end": "2026-09-05",
+            "days_worked": 3,
+            "quiz_average_percent": 78,
+            "writing_average_percent": 62,
+            "speaking_average_percent": 80
+          },
+          {
+            "period_start": "2026-09-06",
+            "period_end": "2026-09-12",
+            "days_worked": 4,
+            "quiz_average_percent": 82,
+            "writing_average_percent": 68,
+            "speaking_average_percent": 79
+          },
+          {
+            "period_start": "2026-09-13",
+            "period_end": "2026-09-19",
+            "days_worked": 5,
+            "quiz_average_percent": 86,
+            "writing_average_percent": 73,
+            "speaking_average_percent": 84
+          },
+          {
+            "period_start": "2026-09-20",
+            "period_end": "2026-09-26",
+            "days_worked": 6,
+            "quiz_average_percent": 90,
+            "writing_average_percent": 79,
+            "speaking_average_percent": 87
+          }
+        ]
+      },
+      "must_deliver": [
+        {
+          "assignment_name": "B2 Module 4 – Unit 2 – Final Assignment",
+          "correction_url": "https://example.com/corrections/daniel-final"
+        }
+      ]
+    },
+    {
+      "request_id": "LAST-SUNDAY-TEST-002",
+      "student_name_for_message": "Brenda Louise",
+      "language": "en",
+      "context": {
+        "digest_day": "SUNDAY",
+        "reporting_period_complete": true,
+        "reporting_period_description": "Completed Sunday-to-Saturday reporting period",
+        "is_last_sunday_of_month": true,
+        "level": "A2",
+        "module": 3,
+        "has_ever_submitted": true
+      },
+      "evidence": {
+        "assessed_results": [
+          {
+            "skill": "QUIZ",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 71
+          },
+          {
+            "skill": "WRITING",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 64
+          },
+          {
+            "skill": "SPEAKING",
+            "result_type": "WEEKLY_AVERAGE",
+            "score_percent": 78
+          },
+          {
+            "skill": "WRITING",
+            "assignment_name": "A2 Module 3 – Unit 4 – Day 6 Assignment",
+            "result_type": "ASSESSED_ASSIGNMENT",
+            "score_percent": 58
+          },
+          {
+            "skill": "SPEAKING",
+            "assignment_name": "A2 Module 3 – Unit 4 – Day 6 Assignment",
+            "result_type": "ASSESSED_ASSIGNMENT",
+            "score_percent": 81
+          }
+        ],
+        "days_worked_current_period": 2,
+        "days_available_current_period": 7,
+        "days_worked_previous_complete_period": 5,
+        "assignment_participation": {
+          "period_scope": "COMPLETE_WEEK",
+          "writing_submitted": true,
+          "speaking_submitted": true,
+          "writing_assignment_count": 1,
+          "speaking_assignment_count": 1
+        },
+        "participation_pattern": {
+          "current_week_days": 2,
+          "recent_complete_weeks": [
+            { "period_start": "2026-08-30", "days_worked": 6 },
+            { "period_start": "2026-09-06", "days_worked": 3 },
+            { "period_start": "2026-09-13", "days_worked": 5 },
+            { "period_start": "2026-09-20", "days_worked": 2 }
+          ],
+          "pattern": "IRREGULAR",
+          "consecutive_weeks_below_four_days": 1,
+          "consistency_priority_next_week": "STRONGER",
+          "suggested_active_days_next_week": 4
+        },
+        "recent_complete_periods": [
+          {
+            "period_start": "2026-08-30",
+            "period_end": "2026-09-05",
+            "days_worked": 6,
+            "quiz_average_percent": 84,
+            "writing_average_percent": 75,
+            "speaking_average_percent": 80
+          },
+          {
+            "period_start": "2026-09-06",
+            "period_end": "2026-09-12",
+            "days_worked": 3,
+            "quiz_average_percent": 79,
+            "writing_average_percent": 70,
+            "speaking_average_percent": 76
+          },
+          {
+            "period_start": "2026-09-13",
+            "period_end": "2026-09-19",
+            "days_worked": 5,
+            "quiz_average_percent": 88,
+            "writing_average_percent": 73,
+            "speaking_average_percent": 83
+          },
+          {
+            "period_start": "2026-09-20",
+            "period_end": "2026-09-26",
+            "days_worked": 2,
+            "quiz_average_percent": 71,
+            "writing_average_percent": 64,
+            "speaking_average_percent": 78
+          }
+        ]
+      },
+      "must_deliver": [
+        {
+          "assignment_name": "A2 Module 3 – Unit 4 – Day 6 Assignment",
+          "correction_url": "https://example.com/corrections/brenda-day-6"
+        }
+      ]
+    },
+    {
+      "request_id": "NEVER-SUBMITTED-TEST-001",
+      "student_name_for_message": "Nadia Mireille",
+      "language": "fr",
+      "context": {
+        "digest_day": "SUNDAY",
+        "reporting_period_complete": true,
+        "reporting_period_description": "Completed Sunday-to-Saturday reporting period",
+        "level": "A1",
+        "module": 1,
+        "days_since_enrolment": 5,
+        "has_ever_submitted": false
+      },
+      "evidence": {
+        "assessed_results": [],
+        "days_worked_current_period": 0,
+        "days_available_current_period": 5,
+        "assignment_participation": {
+          "period_scope": "COMPLETE_WEEK",
+          "writing_submitted": false,
+          "speaking_submitted": false,
+          "writing_assignment_count": 0,
+          "speaking_assignment_count": 0
+        },
+        "participation_pattern": {
+          "current_week_days": 0,
+          "recent_complete_weeks": [],
+          "pattern": "PARTIAL_ENROLMENT_WEEK",
+          "consecutive_weeks_below_four_days": 0,
+          "consistency_priority_next_week": "BUILD_ROUTINE_GENTLY"
+        }
+      },
+      "must_deliver": []
+    },
+    {
+      "request_id": "NEVER-SUBMITTED-TEST-002",
+      "student_name_for_message": "Joseph André",
+      "language": "en",
+      "context": {
+        "digest_day": "FRIDAY",
+        "reporting_period_complete": false,
+        "reporting_period_description": "Work received on Wednesday and Thursday",
+        "level": "A2",
+        "module": 1,
+        "days_since_enrolment": 45,
+        "has_ever_submitted": false
+      },
+      "evidence": {
+        "assessed_results": [],
+        "days_worked_current_period": 0,
+        "days_available_current_period": 2,
+        "assignment_participation": {
+          "period_scope": "INTERIM_WINDOW",
+          "writing_submitted": false,
+          "speaking_submitted": false,
+          "writing_assignment_count": 0,
+          "speaking_assignment_count": 0
+        }
+      },
+      "must_deliver": []
+    }
+  ]
+}
